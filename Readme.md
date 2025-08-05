@@ -1,3 +1,5 @@
+![FurniturePro Banner](Extra%20images/Banner.png)
+
 # 📊 FurniturePro & Co. – Power BI Sales & Customer Intelligence Dashboard
 
 A complete Power BI case study built for **FurniturePro & Co.**, a fictional retail chain, focused on delivering deep insights across sales performance, customer behavior, profitability, and marketing targeting. This project highlights strong analytical storytelling using Power BI's full stack—data modeling, Power Query, advanced DAX, and dashboard design.
@@ -21,72 +23,109 @@ A complete Power BI case study built for **FurniturePro & Co.**, a fictional ret
 - Understand regional and segment-wise sales trends
 - Compare current vs previous year performance
 - Identify customer segments using RFM logic (Recency, Frequency, Monetary)
-- Highlight top performing salespersons by state & segment
+- Highlight top-performing salespersons by state & segment
 - Help marketing teams identify high-value and at-risk customers
 
 ---
 
-## 📁 Folder Structure
+## 💡 Key DAX Measures
 
-| Folder              | Description |
-|---------------------|-------------|
-| `/data`             | (Optional) Sample or placeholder data (CSV/Excel) |
-| `/powerbi`          | Contains the `.pbix` dashboard file |
-| `/docs`             | Includes presentation PDF and screenshots |
-| `/dax_measures`     | DAX scripts and measures used in the project |
+### 🎯 1. Target Status (with conditional logic)
 
----
+```DAX
+TargetStatus = 
+SWITCH(
+    TRUE(),
+    [Sales] >= [Target], "Achieved",
+    [Sales] >= [Target] * 0.75, "Partial",
+    "Not Achieved"
+)
+Used to color-code salesperson performance across regions.
 
-## 🛠 Tools & Technologies
+🧪 2. Profit After Discount (What-If simulation)
+DAX
+Copy
+Edit
+Profit After Discount = 
+[Sales Amount] - ([Sales Amount] * 'Discount Parameter'[Discount %])
+Tied to a slicer to dynamically show profit after applying discounts.
 
-- **Power BI Desktop**
-- **Power Query** (for all transformations)
-- **DAX** (for dynamic KPIs, segmentation, and trend logic)
-- **Excel/CSV** (raw data input)
-- **GitHub** (version control, documentation)
+👥 3. RFM Score Calculation (Customer Segmentation)
+DAX
+Copy
+Edit
+RFM Score = 
+VAR Recency = ...
+VAR Frequency = ...
+VAR Monetary = ...
+RETURN
+Recency + Frequency + Monetary
+Used to segment customers as Loyal, At Risk, New, etc.
 
----
+📁 More measures: /dax_measures/allmeasures.txt
 
-## 📊 Dashboard Pages
+📊 Dashboard Pages
+Executive Summary – Overall sales & returns with YoY trends and KPI cards
 
-1. **Executive Summary** – Overall sales & returns with YoY trends and KPI cards  
-2. **Customer Analysis** – RFM, new customers, segment contribution, scoring system  
-3. **Target Dashboard** – % Target achieved with conditional color logic  
-4. **What-If Dashboard** – Profit simulation based on discount inputs  
-5. **Pareto Analysis** – Dynamic % of sales from top X% of customers
+Customer Analysis – RFM, new customers, segment contribution, scoring system
 
----
+Target Dashboard – % Target achieved with conditional color logic
 
-## 💬 Key DAX Concepts Used
+What-If Dashboard – Profit simulation based on discount inputs
 
-- `SAMEPERIODLASTYEAR`, `DATEADD`, `TOTALYTD`, `SWITCH`, `VAR`
-- RFM Scoring: Recency, Frequency, Monetary logic
-- Conditional formatting with color-coded thresholds
-- Customer churn and propensity scoring models
-- Rank-based logic for top 5 salespersons
+Pareto Analysis – Dynamic % of sales from top X% of customers
 
-> 📂 Full list of measures is included in `/dax_measures/allmeasures.txt`
+🗂️ Folder Structure
+bash
+Copy
+Edit
+furniturepro-sales-dashboard/
+│
+├── README.md
+├── Extra images/
+│   └── Banner.png
+├── screenshots/
+│   ├── executive_summary.png
+│   ├── customer_analysis.png
+│   └── whatif_analysis.png
+├── docs/
+│   └── FurniturePro_CaseStudy.pdf
+├── dax_measures/
+│   ├── allmeasures.txt
+│   └── allmeasurestxt.txt
+├── powerbi/
+│   └── Sales_dashboard.pbix
+🛠 Tools & Technologies
 
----
 
-## 📌 Screenshots & Demo
 
-> 📄 See `/docs/Power_BI_Case_Study.pdf` for a visual walkthrough of the solution.  
-> 📸 Dashboard screenshots available in `/docs/dashboard_screenshots/` (optional).
 
----
 
-## ✍️ Author
+📸 Screenshots
+🧑‍💼 Executive Summary
 
-**Manish Khati**  
-_Data Analyst | Power BI Developer | DAX & Automation Enthusiast_
+👥 Customer Segmentation
 
----
+🧪 What-If Analysis
 
-## 📝 License
+📄 Case Study PDF
+📘 Download full case study
 
-This project is for educational and portfolio demonstration purposes.  
-Raw data has been modified or anonymized.
+🚀 How to Use
+Clone this repository:
 
----
+bash
+Copy
+Edit
+git clone https://github.com/Manishkhati028/furniturepro-sales-dashboard.git
+Open Sales_dashboard.pbix in Power BI Desktop
 
+Replace the data source if needed and click Refresh
+
+Interact with slicers, charts, and simulations!
+
+✍️ Author
+Manish Khati
+Data Analyst | Power BI Developer | Automation Enthusiast
+🔗 LinkedIn
+📧 your.email@example.com
