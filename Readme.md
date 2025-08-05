@@ -241,6 +241,6 @@ RETURN
 
 Choose your preferred format for the full case study:
 
-> 📘 **PDF Report:** [Power BI Case Study – FurniturePro.pdf](docs/Power_BI_Case_Study.pdf)
+> 📘 **PDF Report:** [Power BI Case Study – FurniturePro.pdf](docs/Furniture%20Pro%20Sales_dashboard.pdf)
 
-> 📊 **PowerPoint Presentation:** [FurniturePro Dashboard - Case Study.pptx](docs/FurniturePro_Dashboard_Case_Study.pptx)
+> 📊 **PowerPoint Presentation:** [FurniturePro Dashboard - Case Study.pptx](docs/Furniture%20Pro%20Case%20study.pptx)
