@@ -199,3 +199,48 @@ RETURN
 ```
 
 🔹 **Visual Intelligence:** Complete conditional formatting system with performance indicators and color coding.
+
+---
+
+## 📊 Key Business Insights
+
+- 🟢 **The Consumer segment drives over 60% of revenue** but has the highest return rate at 12.5%
+- 🟠 **Region South underperformed QoQ** and failed to meet targets in Q3 and Q4 2024
+- 🔴 **Top 20% of customers contribute ~78% of sales** – confirms Pareto Principle validation
+- 🟢 **"At Risk" customers represent 10% of base** but generate ~22% revenue opportunity
+- 🧠 **Marketing campaign targeting "Loyal" and "At Risk" customers** can increase ROI by 35%
+- 📈 **Customer retention improved by 15% YoY** through targeted RFM segmentation strategies
+- 💰 **What-If analysis shows 5% discount increase** can boost volume by 12% with net profit gain
+
+---
+
+## 🧭 How to Use the Dashboard
+
+- **Open the .pbix file** using Power BI Desktop (requires Power BI Pro or Premium)
+- **Use slicers** to filter by Region, Segment, Category, or Time Period across all pages
+- **Navigate through each page** using the bottom tabs for different analytical views
+- **On the What-If page**, adjust the discount sliders to simulate pricing strategies
+- **Drill-through functionality** available on customer and sales visualizations
+- **Export data** from any visual for further analysis in Excel
+
+---
+
+## 📁 Project Structure
+
+| Folder | Description |
+|------------------------|-------------|
+| `/screenshots/` | Dashboard images for README and portfolio |
+| `/docs/` | **Case study presentations and documentation** |
+| `/dax_measures/` | Complete DAX calculations and formulas |
+| `/data/` | Sample datasets and data model schema |
+| `/powerbi/` | Final .pbix Power BI file |
+
+---
+
+## 📄 Complete Case Study Documentation
+
+Choose your preferred format for the full case study:
+
+> 📘 **PDF Report:** [Power BI Case Study – FurniturePro.pdf](docs/Power_BI_Case_Study.pdf)
+
+> 📊 **PowerPoint Presentation:** [FurniturePro Dashboard - Case Study.pptx](docs/FurniturePro_Dashboard_Case_Study.pptx)
