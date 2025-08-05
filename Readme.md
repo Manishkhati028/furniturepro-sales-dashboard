@@ -28,6 +28,25 @@ A complete Power BI case study built for **FurniturePro & Co.**, a fictional ret
 
 ---
 
+## 🖼️ Dashboard Screenshots
+
+### 1. Executive Summary  
+![Executive Summary](screenshots/Executive_summary.png)
+
+### 2. Customer Analysis  
+![Customer Analysis](screenshots/Customer_Analysis.png)
+
+### 3. Target Tracking  
+![Target Dashboard](screenshots/Targets.png)
+
+### 4. What-If Analysis  
+![What-If Dashboard](screenshots/Whatif.png)
+
+### 5. Pareto Analysis  
+![Pareto Dashboard](screenshots/Pareto_analysis.png)
+
+---
+
 ## 💡 Top 5 Most Complex & Important DAX Measures
 
 ### 🏆 **1. Customer Retention Rate with Multi-Year Logic**
