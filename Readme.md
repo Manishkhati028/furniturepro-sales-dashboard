@@ -28,9 +28,9 @@ A complete Power BI case study built for **FurniturePro & Co.**, a fictional ret
 
 ---
 
-## 💡 Key DAX Measures
+## 💡 Key DAX Measures Used
 
-### 🎯 1. Target Status (with conditional logic)
+### 1. 🎯 Target Achievement Logic
 
 ```DAX
 TargetStatus = 
@@ -40,17 +40,17 @@ SWITCH(
     [Sales] >= [Target] * 0.75, "Partial",
     "Not Achieved"
 )
-Used to color-code salesperson performance across regions.
+🔹 Used to apply conditional formatting in the Target dashboard.
 
-🧪 2. Profit After Discount (What-If simulation)
+2. 🧪 What-If Discount Simulation
 DAX
 Copy
 Edit
 Profit After Discount = 
 [Sales Amount] - ([Sales Amount] * 'Discount Parameter'[Discount %])
-Tied to a slicer to dynamically show profit after applying discounts.
+🔹 Enables dynamic simulation of discount impact on profitability.
 
-👥 3. RFM Score Calculation (Customer Segmentation)
+3. 👥 RFM Score – Customer Segmentation
 DAX
 Copy
 Edit
@@ -60,72 +60,28 @@ VAR Frequency = ...
 VAR Monetary = ...
 RETURN
 Recency + Frequency + Monetary
-Used to segment customers as Loyal, At Risk, New, etc.
+🔹 Used to classify customers: Loyal, At Risk, Lost, New.
 
-📁 More measures: /dax_measures/allmeasures.txt
-
-📊 Dashboard Pages
-Executive Summary – Overall sales & returns with YoY trends and KPI cards
-
-Customer Analysis – RFM, new customers, segment contribution, scoring system
-
-Target Dashboard – % Target achieved with conditional color logic
-
-What-If Dashboard – Profit simulation based on discount inputs
-
-Pareto Analysis – Dynamic % of sales from top X% of customers
-
-🗂️ Folder Structure
-bash
+4. 📈 YoY Sales Change
+DAX
 Copy
 Edit
-furniturepro-sales-dashboard/
-│
-├── README.md
-├── Extra images/
-│   └── Banner.png
-├── screenshots/
-│   ├── executive_summary.png
-│   ├── customer_analysis.png
-│   └── whatif_analysis.png
-├── docs/
-│   └── FurniturePro_CaseStudy.pdf
-├── dax_measures/
-│   ├── allmeasures.txt
-│   └── allmeasurestxt.txt
-├── powerbi/
-│   └── Sales_dashboard.pbix
-🛠 Tools & Technologies
+YoY Sales % Change = 
+DIVIDE(
+    [Total Sales] - CALCULATE([Total Sales], SAMEPERIODLASTYEAR('Date'[Date])),
+    CALCULATE([Total Sales], SAMEPERIODLASTYEAR('Date'[Date]))
+)
+🔹 Used in KPI cards for yearly comparison.
 
-
-
-
-
-📸 Screenshots
-🧑‍💼 Executive Summary
-
-👥 Customer Segmentation
-
-🧪 What-If Analysis
-
-📄 Case Study PDF
-📘 Download full case study
-
-🚀 How to Use
-Clone this repository:
-
-bash
+5. 🏅 Top 5 Salespersons by Segment
+DAX
 Copy
 Edit
-git clone https://github.com/Manishkhati028/furniturepro-sales-dashboard.git
-Open Sales_dashboard.pbix in Power BI Desktop
-
-Replace the data source if needed and click Refresh
-
-Interact with slicers, charts, and simulations!
-
-✍️ Author
-Manish Khati
-Data Analyst | Power BI Developer | Automation Enthusiast
-🔗 LinkedIn
-📧 your.email@example.com
+Top5 Salespersons = 
+RANKX(
+    ALLSELECTED('Salesperson'),
+    [Total Sales],
+    ,
+    DESC
+)
+🔹 Enables spotlight visuals and dynamic leaderboard.
