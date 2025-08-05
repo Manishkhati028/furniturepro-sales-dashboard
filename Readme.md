@@ -30,11 +30,9 @@ A complete Power BI case study built for **FurniturePro & Co.**, a fictional ret
 
 ## 💡 Key DAX Measures Used
 
----
-
 ### 🎯 **1. Target Achievement Logic**
 
-```DAX
+```dax
 TargetStatus = 
 SWITCH(
     TRUE(),
@@ -50,7 +48,7 @@ SWITCH(
 
 ### 🧪 **2. What-If Discount Simulation**
 
-```DAX
+```dax
 Profit After Discount = 
 [Sales Amount] - ([Sales Amount] * 'Discount Parameter'[Discount %])
 ```
@@ -61,13 +59,12 @@ Profit After Discount =
 
 ### 👥 **3. RFM Score – Customer Segmentation**
 
-```DAX
+```dax
 RFM Score = 
 VAR Recency = ...
 VAR Frequency = ...
 VAR Monetary = ...
-RETURN
-Recency + Frequency + Monetary
+RETURN Recency + Frequency + Monetary
 ```
 
 🔹 Used to classify customers as Loyal, At Risk, Lost, or New.
@@ -76,7 +73,7 @@ Recency + Frequency + Monetary
 
 ### 📈 **4. YoY Sales % Change**
 
-```DAX
+```dax
 YoY Sales % Change = 
 DIVIDE(
     [Total Sales] - CALCULATE([Total Sales], SAMEPERIODLASTYEAR('Date'[Date])),
@@ -90,7 +87,7 @@ DIVIDE(
 
 ### 🏅 **5. Top 5 Salespersons by Segment**
 
-```DAX
+```dax
 Top5 Salespersons = 
 RANKX(
     ALLSELECTED('Salesperson'),
