@@ -42,8 +42,8 @@ SWITCH(
 )
 🔹 Used to apply conditional formatting in the Target dashboard.
 
-### **🧪 2. What-If Discount Simulation
-DAX
+### ** 2. 🧪What-If Discount Simulation
+```DAX
 Copy
 Edit
 Profit After Discount = 
@@ -51,7 +51,7 @@ Profit After Discount =
 🔹 Enables dynamic simulation of discount impact on profitability.
 
 ### **👥 3. RFM Score – Customer Segmentation
-DAX
+```DAX
 Copy
 Edit
 RFM Score = 
@@ -63,7 +63,7 @@ Recency + Frequency + Monetary
 🔹 Used to classify customers as Loyal, At Risk, Lost, or New.
 
 ### **📈 4. YoY Sales % Change
-DAX
+```DAX
 Copy
 Edit
 YoY Sales % Change = 
@@ -74,7 +74,7 @@ DIVIDE(
 🔹 Used in KPI cards to show year-over-year sales growth or decline.
 
 ### **🏅 5. Top 5 Salespersons by Segment
-DAX
+```DAX
 Copy
 Edit
 Top5 Salespersons = 
