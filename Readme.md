@@ -42,7 +42,7 @@ SWITCH(
 )
 🔹 Used to apply conditional formatting in the Target dashboard.
 
-2. 🧪 What-If Discount Simulation
+### **🧪 2. What-If Discount Simulation
 DAX
 Copy
 Edit
@@ -50,7 +50,7 @@ Profit After Discount =
 [Sales Amount] - ([Sales Amount] * 'Discount Parameter'[Discount %])
 🔹 Enables dynamic simulation of discount impact on profitability.
 
-3. 👥 RFM Score – Customer Segmentation
+### **👥 3. RFM Score – Customer Segmentation
 DAX
 Copy
 Edit
@@ -60,9 +60,9 @@ VAR Frequency = ...
 VAR Monetary = ...
 RETURN
 Recency + Frequency + Monetary
-🔹 Used to classify customers: Loyal, At Risk, Lost, New.
+🔹 Used to classify customers as Loyal, At Risk, Lost, or New.
 
-4. 📈 YoY Sales Change
+### **📈 4. YoY Sales % Change
 DAX
 Copy
 Edit
@@ -71,9 +71,9 @@ DIVIDE(
     [Total Sales] - CALCULATE([Total Sales], SAMEPERIODLASTYEAR('Date'[Date])),
     CALCULATE([Total Sales], SAMEPERIODLASTYEAR('Date'[Date]))
 )
-🔹 Used in KPI cards for yearly comparison.
+🔹 Used in KPI cards to show year-over-year sales growth or decline.
 
-5. 🏅 Top 5 Salespersons by Segment
+### **🏅 5. Top 5 Salespersons by Segment
 DAX
 Copy
 Edit
@@ -84,4 +84,4 @@ RANKX(
     ,
     DESC
 )
-🔹 Enables spotlight visuals and dynamic leaderboard.
+🔹 Enables dynamic leaderboard visuals for spotlighting performance.
