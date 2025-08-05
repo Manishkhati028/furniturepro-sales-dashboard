@@ -1,0 +1,326 @@
+# Missing DAX Codes and Visual Implementation Steps
+
+## 🆕 New Customer Analysis (2021) - Complete Implementation
+
+### Step 1: New Customer Identification DAX
+```dax
+// New Customers 2021 (Customers who made first purchase in 2021)
+New Customers 2021 = 
+VAR NewCustomers2021 = 
+    CALCULATE(
+        DISTINCTCOUNT(Orders[Customer ID]),
+        FILTER(
+            ALL(Orders),
+            YEAR(Orders[Order Date]) = 2021 &&
+            CALCULATE(
+                MIN(Orders[Order Date]),
+                ALLEXCEPT(Orders, Orders[Customer ID])
+            ) >= DATE(2021,1,1) &&
+            CALCULATE(
+                MIN(Orders[Order Date]),
+                ALLEXCEPT(Orders, Orders[Customer ID])
+            ) <= DATE(2021,12,31)
+        )
+    )
+RETURN NewCustomers2021
+
+// Is New Customer 2021 (Column for filtering)
+Is New Customer 2021 = 
+VAR FirstOrderDate = 
+    CALCULATE(
+        MIN(Orders[Order Date]),
+        ALLEXCEPT(Orders, Orders[Customer ID])
+    )
+RETURN IF(YEAR(FirstOrderDate) = 2021, "Yes", "No")
+```
+
+### Step 2: New Customer Sales Analysis
+```dax
+// New Customer Sales 2021
+New Customer Sales 2021 = 
+CALCULATE(
+    [Total Sales],
+    FILTER(Orders, [Is New Customer 2021] = "Yes")
+)
+
+// New Customer Average Quantity 2021
+New Customer Avg Quantity 2021 = 
+CALCULATE(
+    AVERAGE(Orders[Quantity]),
+    FILTER(Orders, [Is New Customer 2021] = "Yes")
+)
+
+// New Customer Average Discount 2021
+New Customer Avg Discount 2021 = 
+CALCULATE(
+    AVERAGE(Orders[Discount]) * 100,
+    FILTER(Orders, [Is New Customer 2021] = "Yes")
+)
+
+// New Customer Count by State 2021
+New Customer Count by State 2021 = 
+CALCULATE(
+    DISTINCTCOUNT(Orders[Customer ID]),
+    FILTER(Orders, [Is New Customer 2021] = "Yes")
+)
+```
+
+### Step 3: Geographic Distribution for New Customers
+```dax
+// New Customer Geographic Distribution %
+New Customer State Distribution % = 
+VAR NewCustomersInState = [New Customer Count by State 2021]
+VAR TotalNewCustomers = [New Customers 2021]
+RETURN DIVIDE(NewCustomersInState, TotalNewCustomers) * 100
+```
+
+## 📊 Top Salespeople by Segment Implementation
+
+### Step 1: Salesperson Performance by Segment
+```dax
+// Sales by Salesperson and Segment
+Salesperson Segment Sales = 
+CALCULATE(
+    [Total Sales],
+    ALLEXCEPT(Orders, Orders[SalesPerson], Orders[Segment])
+)
+
+// Average Discount by Salesperson and Segment
+Salesperson Segment Avg Discount = 
+CALCULATE(
+    AVERAGE(Orders[Discount]) * 100,
+    ALLEXCEPT(Orders, Orders[SalesPerson], Orders[Segment])
+)
+
+// Salesperson Rank within Segment
+Salesperson Rank in Segment = 
+RANKX(
+    FILTER(
+        ALL(SalesPerson[Sales_person]),
+        CALCULATE([Total Sales]) > 0
+    ),
+    CALCULATE([Total Sales]),
+    DESC
+)
+
+// Top 5 Salespeople Filter
+Is Top 5 Salesperson = 
+IF([Salesperson Rank in Segment] <= 5, "Yes", "No")
+```
+
+### Step 2: State vs City Analysis Toggle
+```dax
+// Dynamic Location Measure (for State/City toggle)
+Location Sales = 
+IF(
+    SELECTEDVALUE('Location Toggle'[Selection]) = "State",
+    CALCULATE([Total Sales], ALLEXCEPT(Orders, Orders[State])),
+    CALCULATE([Total Sales], ALLEXCEPT(Orders, Orders[City]))
+)
+
+// Location Name (Dynamic)
+Location Name = 
+IF(
+    SELECTEDVALUE('Location Toggle'[Selection]) = "State",
+    SELECTEDVALUE(Orders[State]),
+    SELECTEDVALUE(Orders[City])
+)
+```
+
+## 🎯 Customer Scoring System (BONUS Section)
+
+### Step 1: Customer Scoring Calculations
+```dax
+// Customer Value Score (0-100)
+Customer Value Score = 
+VAR CustomerSales = [Customer Monetary]
+VAR MaxSales = MAXX(ALL(Customer), [Customer Monetary])
+VAR MinSales = MINX(ALL(Customer), [Customer Monetary])
+RETURN 
+ROUND(
+    ((CustomerSales - MinSales) / (MaxSales - MinSales)) * 100,
+    0
+)
+
+// Propensity Score (based on recent activity)
+Propensity Score = 
+VAR DaysSinceLastOrder = [Customer Recency]
+VAR PropensityBase = 
+    SWITCH(
+        TRUE(),
+        DaysSinceLastOrder <= 30, 90,
+        DaysSinceLastOrder <= 60, 75,
+        DaysSinceLastOrder <= 90, 60,
+        DaysSinceLastOrder <= 180, 40,
+        DaysSinceLastOrder <= 365, 25,
+        10
+    )
+VAR FrequencyBonus = MIN([Customer Frequency] * 2, 10)
+RETURN MIN(PropensityBase + FrequencyBonus, 100)
+
+// Churn Risk Score (0-100, higher = more risk)
+Churn Risk Score = 
+VAR RecencyRisk = 
+    SWITCH(
+        TRUE(),
+        [Customer Recency] <= 30, 10,
+        [Customer Recency] <= 60, 25,
+        [Customer Recency] <= 90, 40,
+        [Customer Recency] <= 180, 60,
+        [Customer Recency] <= 365, 80,
+        95
+    )
+VAR FrequencyRisk = 
+    SWITCH(
+        TRUE(),
+        [Customer Frequency] >= 10, 5,
+        [Customer Frequency] >= 5, 15,
+        [Customer Frequency] >= 3, 30,
+        [Customer Frequency] >= 2, 50,
+        70
+    )
+RETURN MIN((RecencyRisk + FrequencyRisk) / 2, 100)
+
+// Marketing Action Recommendation
+Marketing Action = 
+VAR ValueScore = [Customer Value Score]
+VAR ChurnRisk = [Churn Risk Score]
+RETURN
+SWITCH(
+    TRUE(),
+    ValueScore >= 70 && ChurnRisk <= 30, "RETAIN - VIP Treatment",
+    ValueScore >= 70 && ChurnRisk > 30, "WIN-BACK - Urgent Action",
+    ValueScore >= 40 && ChurnRisk <= 50, "TARGET - Cross-sell/Upsell",
+    ValueScore < 40 && ChurnRisk > 60, "MONITOR - Low Priority",
+    "NURTURE - General Campaign"
+)
+```
+
+## 📈 Additional Missing Measures
+
+### High-Value Segment Analysis
+```dax
+// High-Value Customer Definition
+Is High Value Customer = 
+IF([Customer Value Score] >= 70, "Yes", "No")
+
+// High-Value Customer Count
+High Value Customer Count = 
+CALCULATE(
+    DISTINCTCOUNT(Orders[Customer ID]),
+    FILTER(Customer, [Is High Value Customer] = "Yes")
+)
+
+// High-Value Customer Percentage
+High Value Customer % = 
+DIVIDE([High Value Customer Count], [Total Customers]) * 100
+```
+
+### Returns Analysis (Missing Details)
+```dax
+// Top Products by Returns Count
+Product Return Count = 
+CALCULATE(
+    DISTINCTCOUNT(Returns[Returned]),
+    USERELATIONSHIP(Orders[Row ID], Returns[Returned])
+)
+
+// Return Reason Analysis (if you have reason data)
+Return Rate by Category = 
+VAR CategoryReturns = 
+    CALCULATE(
+        [Total Returns],
+        ALLEXCEPT(Product, Product[Category])
+    )
+VAR CategorySales = 
+    CALCULATE(
+        [Total Sales],
+        ALLEXCEPT(Product, Product[Category])
+    )
+RETURN DIVIDE(CategoryReturns, CategorySales) * 100
+
+// Returns by Region
+Regional Return Analysis = 
+CALCULATE(
+    [Total Returns],
+    ALLEXCEPT(Orders, Orders[Region])
+)
+```
+
+## 🔧 Visual Implementation Steps
+
+### New Customer Analysis Table Visual
+1. **Insert Table Visual**
+2. **Add to Values:**
+   - New Customers 2021: `[New Customers 2021]`
+   - Total Sales: `FORMAT([New Customer Sales 2021]/1000, "₹0K")`
+   - Avg Quantity: `FORMAT([New Customer Avg Quantity 2021], "0.0")`
+   - Avg Discount: `FORMAT([New Customer Avg Discount 2021], "0.0") & "%"`
+
+3. **Add Geographic Distribution:**
+   - Create a separate Matrix visual
+   - Rows: `Orders[State]`
+   - Values: `[New Customer Count by State 2021]`, `[New Customer State Distribution %]`
+
+### Top Salespeople Matrix Visual
+1. **Insert Matrix Visual**
+2. **Rows:** `Orders[Segment]`
+3. **Columns:** `SalesPerson[Sales_person]`
+4. **Values:** 
+   - `[Salesperson Segment Sales]`
+   - `[Salesperson Segment Avg Discount]`
+5. **Filters:** Add `[Is Top 5 Salesperson] = "Yes"`
+
+### Customer Scoring Cards
+1. **Insert 3 Card Visuals**
+2. **Card 1 - Propensity Score:**
+   - Fields: `[Propensity Score]`
+   - Format: Add "%" suffix, conditional formatting
+3. **Card 2 - Customer Value Score:**
+   - Fields: `[Customer Value Score]`
+   - Conditional formatting: Green >70, Yellow 40-70, Red <40
+4. **Card 3 - Churn Risk:**
+   - Fields: `[Churn Risk Score]`
+   - Conditional formatting: Red >60, Yellow 30-60, Green <30
+
+### State/City Toggle Implementation
+1. **Create Parameter Table:**
+```dax
+Location Toggle = DATATABLE(
+    "Selection", STRING,
+    {
+        {"State"},
+        {"City"}
+    }
+)
+```
+2. **Add Slicer:** Use `Location Toggle[Selection]`
+3. **Update Chart:** Use `[Location Sales]` measure
+
+## 🎨 Formatting Guidelines
+
+### Conditional Formatting Rules
+```
+Customer Value Score:
+- Green: >= 70
+- Yellow: 40-69  
+- Red: < 40
+
+Churn Risk Score:
+- Red: >= 60
+- Yellow: 30-59
+- Green: < 30
+
+Target Achievement:
+- Green: >= 100%
+- Yellow: 80-99%
+- Red: < 80%
+```
+
+### Number Formatting
+- Sales: `₹0.0,K` or `₹0.0,,M`
+- Percentages: `0.0%`
+- Scores: `0`
+- Quantities: `0.0`
+
+Would you like me to elaborate on any specific section or provide additional DAX codes for other missing components?

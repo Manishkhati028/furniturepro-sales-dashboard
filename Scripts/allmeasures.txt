@@ -1,0 +1,1421 @@
+SUM(Orders[Sales Amount])
+"VAR SelectedPeriod = SELECTEDVALUE(Period_selector[Year_month_quarter_slicer Order])
+VAR CurrentSales = [Total Sales]  
+VAR CompareValue = 
+    SWITCH(
+        SelectedPeriod,
+        0, CALCULATE([Total Sales], SAMEPERIODLASTYEAR('Date Table'[Date])),
+        1, CALCULATE([Total Sales], DATEADD('Date Table'[Date], -1, QUARTER)),
+        2, CALCULATE([Total Sales], DATEADD('Date Table'[Date], -1, MONTH))
+    )
+VAR Result = 
+    DIVIDE(CurrentSales - CompareValue, CompareValue)/100
+RETURN
+    Result"
+"VAR SelectedOrder = SELECTEDVALUE(Period_selector[Year_month_quarter_slicer Order])
+VAR Label =
+    SWITCH(
+        SelectedOrder,
+        0, ""Yearly"",
+        1, ""Quarterly"",
+        2, ""Monthly"",
+        ""Period""
+    )
+RETURN
+""Sales Trend "" & Label"
+"IF (
+    [Period-over-Period % Change] > 0,
+    ""#2ECC71"",   -- âœ… Green (Success)
+    ""#E74C3C""    -- âŒ Red (Negative)
+)"
+"VAR SelectedOrder = SELECTEDVALUE('Dynamic Perameter'[Dynamic Perameter Order])
+VAR Label =
+    SWITCH(
+        SelectedOrder,
+        0, ""Category"",
+        1, ""Region"",
+        2, ""Segment"",
+        ""Period""
+    )
+RETURN
+""Sales by "" & Label"
+SUM(Orders[Quantity])
+SUM(Orders[Profit])
+COUNTROWS(Orders)
+DIVIDE([Total Sales], [Total Orders])
+DIVIDE([Total Profit], [Total Sales])
+[Total Sales] - [Total Returns]
+"VAR FilteredSales =
+    CALCULATE(
+        SUM('Sales Target'[TotalSales]),
+        FILTER('Sales Target', 'Sales Target'[TotalSales] > 'Sales Target'[Target])
+    )
+
+VAR TotalTarget =
+    SUM('Sales Target'[Target])
+
+RETURN
+DIVIDE(FilteredSales, TotalTarget, 0)"
+"VAR SelectedSort = SELECTEDVALUE('Sort By'[Sort Option])
+RETURN 
+SWITCH(
+    SelectedSort,
+    ""Total Sales"", [Total Sales],
+    ""Target"", SUM('Sales Target'[Target]),  
+    ""% Target Achieved"", DIVIDE([Total Sales], SUM('Sales Target'[Target])),
+    BLANK()
+)"
+"VAR Entity = 
+    SWITCH(
+        SELECTEDVALUE('Region_State_slicer'[Region_State_slicer Order]),
+        0, ""Region"",
+        1, ""State"",
+        ""Region/State"" 
+    )
+VAR SortBy = SELECTEDVALUE('Sort By'[Sort Option], ""..."")
+RETURN
+""Top 4 "" & Entity & "" by "" & SortBy"
+"VAR _currentSales = [Total Sales] - [Total Returns]
+VAR _lastYearSales = 
+    CALCULATE(
+        [Total Sales] - [Total Returns],
+        SAMEPERIODLASTYEAR('Date Table'[Date])
+    )
+
+VAR _pctChange = DIVIDE(_currentSales - _lastYearSales, _lastYearSales)
+VAR _arrow = IF(_pctChange > 0, ""â–²+"", ""â–¼"")
+
+RETURN
+IF(
+    ISBLANK(_lastYearSales),
+    BLANK(),
+    ""Variance: "" & _arrow & FORMAT(_pctChange, ""0.0%"")
+)"
+"VAR _PreviousYear = 
+    CALCULATE(
+        MAX('Date Table'[Year]),
+        SAMEPERIODLASTYEAR('Date Table'[Date])
+    )
+
+VAR _PreviousQty = [Net Sales Last Year]
+
+RETURN
+IF(
+    NOT ISBLANK(_PreviousYear),
+    _PreviousYear & "" : $"" & FORMAT(_PreviousQty, ""#,##0""),
+    BLANK()
+)"
+"VAR _Change = 
+    DIVIDE(
+        [Total Sales(Net)] - [Net Sales Last Year],
+        [Net Sales Last Year]
+    )
+
+RETURN
+IF(
+    ISBLANK(_Change),
+    BLANK(),
+    IF(
+        _Change > 0,
+        ""#03A64A"",   
+        ""#BF0426""    
+    )
+)"
+"VAR FilteredSales =
+    [Pct Target Achieved]
+
+VAR TotalTarget =
+    [Target Last Year]
+
+VAR _pct = DIVIDE(FilteredSales, TotalTarget, 0)
+VAR _arrow = IF(_pct > 1, ""â–²+"", ""â–¼"")
+
+RETURN
+IF(
+    ISBLANK(_pct),
+    BLANK(),
+    ""Variance: "" & _arrow & FORMAT(_pct - 1, ""0.0%"")  // Show % over/under 100%
+)"
+"VAR _currentPct = [Pct Target Achieved]
+VAR _previousPct = 
+    CALCULATE(
+        [Pct Target Achieved],
+        DATEADD('Date Table'[Date], -1, YEAR)
+    )
+
+VAR _pctChange = 
+    DIVIDE(_currentPct - _previousPct, _previousPct)
+
+
+
+RETURN
+IF(
+    ISBLANK(_pctChange),
+    BLANK(),
+    IF(_pctChange > 0, ""#03A64A"", ""#BF0426"")  
+)"
+"VAR _PreviousYearPct = 
+    CALCULATE(
+        [Pct Target Achieved],
+        DATEADD('Date Table'[Date], -1, YEAR)
+    )
+
+VAR _PreviousYear =
+    CALCULATE(
+        MAX('Date Table'[Year]),
+        DATEADD('Date Table'[Date], -1, YEAR)
+    )
+
+RETURN  
+IF(
+    NOT ISBLANK(_PreviousYearPct),
+    _PreviousYear & "" : "" & FORMAT(_PreviousYearPct, ""0.00%""),
+    BLANK()
+)"
+"VAR _Change = 
+    DIVIDE(
+        [Total Sales(Net)] - [Net Sales Last Year],
+        [Net Sales Last Year]
+    )
+
+RETURN
+IF(
+    ISBLANK(_Change),
+    BLANK(),
+    IF(
+        _Change > 0,
+        ""#03A64A"",   // âœ… Green for positive change
+        ""#BF0426""    // âŒ Red for negative change
+    )
+)"
+"VAR _PreviousMargin = 
+    CALCULATE(
+        [Profit Margin %],
+        DATEADD('Date Table'[Date], -1, YEAR)
+    )
+
+VAR _PreviousYear =
+    CALCULATE(
+        MAX('Date Table'[Year]),
+        DATEADD('Date Table'[Date], -1, YEAR)
+    )
+
+RETURN  
+IF(
+    NOT ISBLANK(_PreviousMargin),
+    _PreviousYear & "" : "" & FORMAT(_PreviousMargin, ""0.00%""),
+    BLANK()
+)"
+"VAR _current = [Profit Margin %]
+
+VAR _previous = 
+    CALCULATE(
+        [Profit Margin %],
+        DATEADD('Date Table'[Date], -1, YEAR)
+    )
+
+VAR _change = DIVIDE(_current - _previous, _previous)
+VAR _arrow = IF(_change > 0, ""â–²+"", ""â–¼"")
+
+RETURN
+IF(
+    ISBLANK(_change),
+    BLANK(),
+    ""Variance: "" & _arrow & FORMAT(_change, ""0.0%"")
+)"
+"VAR _current = [Profit Margin %]
+
+VAR _previous = 
+    CALCULATE(
+        [Profit Margin %],
+        DATEADD('Date Table'[Date], -1, YEAR)
+    )
+
+VAR _change = DIVIDE(_current - _previous, _previous)
+
+RETURN
+IF(
+    ISBLANK(_change),
+    BLANK(),
+    IF(_change > 0, ""#03A64A"", ""#BF0426"")
+)"
+"VAR _PreviousReturns = 
+    CALCULATE(
+        [Total Returns],
+        DATEADD('Date Table'[Date], -1, YEAR)
+    )
+
+VAR _PreviousYear =
+    CALCULATE(
+        MAX('Date Table'[Year]),
+        DATEADD('Date Table'[Date], -1, YEAR)
+    )
+
+RETURN  
+IF(
+    NOT ISBLANK(_PreviousReturns),
+    _PreviousYear & "" : $"" & FORMAT(_PreviousReturns, ""#,##0""),
+    BLANK()
+)"
+"VAR _current = [Total Returns]
+
+VAR _previous = 
+    CALCULATE(
+        [Total Returns],
+        DATEADD('Date Table'[Date], -1, YEAR)
+    )
+
+VAR _change = DIVIDE(_current - _previous, _previous)
+VAR _arrow = IF(_change > 0, ""â–²+"", ""â–¼"")
+
+RETURN
+IF(
+    ISBLANK(_change),
+    BLANK(),
+    ""Variance: "" & _arrow & FORMAT(_change, ""0.0%"")
+)"
+"VAR _current = [Total Returns]
+
+VAR _previous = 
+    CALCULATE(
+        [Total Returns],
+        DATEADD('Date Table'[Date], -1, YEAR)
+    )
+
+VAR _change = DIVIDE(_current - _previous, _previous)
+
+RETURN
+IF(
+    ISBLANK(_change),
+    BLANK(),
+    IF(_change > 0, ""#BF0426"", ""#03A64A"") 
+)"
+"DIVIDE(
+              [Total Sales(Net)]-[Net Sales Last Year], 
+            [Net Sales Last Year],0)"
+"SWITCH(
+    TRUE(),
+    [Growth Pct] > 0.15, ""Excellent"",
+    [Growth Pct] > 0.05, ""Good"",
+    [Growth Pct] >= -0.05, ""Stable"",
+    [Growth Pct] >= -0.15, ""Declining"",
+    ""Poor""
+)"
+"var _selectedyear = SELECTEDVALUE('Date Table'[Year])
+RETURN    
+    ""Sales "" & (_selectedyear)"
+"var _selectedyear = SELECTEDVALUE('Date Table'[Year])
+RETURN    
+    ""Sales "" & (_selectedyear - 1)"
+"YoY Growth %"
+"Region / Segment / Category"
+"Performance"
+"VAR _Change = DIVIDE([Total Sales(Net)] - [Net Sales Last Year], [Net Sales Last Year])
+RETURN
+IF(
+    ISBLANK(_Change), 
+    BLANK(),
+    SWITCH(
+        TRUE(),
+        _Change >= 0.15, ""
+#d4edda"",    -- High Growth (Light Green)
+        _Change >= 0.05, ""
+#e8f5e8"",    -- Good Growth (Very Light Green)
+        _Change >= -0.05, ""
+#f8f9fa"",   -- Stable (Light Gray)
+        _Change >= -0.15, ""
+#fff3cd"",   -- Decline (Light Yellow)
+        ""
+#f8d7da""                      -- Poor Performance (Light Red)
+    )
+)"
+"VAR _Change = DIVIDE([Total Sales(Net)] - [Net Sales Last Year], [Net Sales Last Year])
+RETURN
+IF(
+    ISBLANK(_Change), 
+    BLANK(),
+    SWITCH(
+        TRUE(),
+        _Change >= 0.15, ""#155724"",    -- Dark Green text
+        _Change >= 0.05, ""#2d5a2d"",    -- Medium Green text
+        _Change >= -0.05, ""#495057"",   -- Dark Gray text
+        _Change >= -0.15, ""#856404"",   -- Dark Yellow text
+        ""#721c24""                      -- Dark Red text
+    )
+)"
+"â–  High Growth (>15%)     â–  Good Growth (5-15%)     â–  Stable (-5% to 5%)     â–  Decline (-5% to -15%)     â–  Poor (<-15%)"
+"VAR _ReturnRate = [Return Rate %]
+RETURN 
+    IF(
+        ISBLANK(_ReturnRate),
+        BLANK(),
+        SWITCH(
+            TRUE(),
+            _ReturnRate <= 2, ""#155724"",      -- Dark Green text (Excellent - Low returns)
+            _ReturnRate <= 5, ""#2d5a2d"",      -- Medium Green text (Good)
+            _ReturnRate <= 10, ""#495057"",     -- Dark Gray text (Average)
+            _ReturnRate <= 15, ""#856404"",     -- Dark Yellow text (Concerning)
+            ""#721c24""                         -- Dark Red text (Critical - High returns)
+        )
+    )"
+"VAR _ReturnRate = [Return Rate %]
+RETURN 
+    IF(
+        ISBLANK(_ReturnRate),
+        BLANK(),
+        SWITCH(
+            TRUE(),
+            _ReturnRate <= 2, ""#d4edda"",      -- Excellent Performance (Light Green)
+            _ReturnRate <= 5, ""#e8f5e8"",      -- Good Performance (Very Light Green)
+            _ReturnRate <= 10, ""#f8f9fa"",     -- Average Performance (Light Gray)
+            _ReturnRate <= 15, ""#fff3cd"",     -- Poor Performance (Light Yellow)
+            ""#f8d7da""                         -- Critical Performance (Light Red)
+        )
+    )"
+"VAR CurrentTarget = 
+    CALCULATE(
+        SUM('Sales Target'[Target]),
+        FILTER(
+            'Sales Target',
+            YEAR(DATEVALUE('Sales Target'[MonthYear])) = SELECTEDVALUE('Date Table'[Year]
+        )
+    ))
+RETURN DIVIDE([Total Sales], CurrentTarget) * 100"
+"VAR _SelectedYear = SELECTEDVALUE('Date Table'[Year])
+
+-- Get distinct MonthStart dates from Orders for the selected year
+VAR MonthYearTable =
+    SELECTCOLUMNS(
+        FILTER(
+            ADDCOLUMNS(
+                VALUES(Orders[Order Date]),
+                ""MonthStart"", DATE(YEAR([Order Date]), MONTH([Order Date]), 1),
+                ""Year"", YEAR([Order Date])
+            ),
+            [Year] = _SelectedYear
+        ),
+        ""Month"", [MonthStart]
+    )
+
+RETURN
+CALCULATE(
+    SUM('Sales Target'[Target]),
+    TREATAS(
+        MonthYearTable,
+        'Sales Target'[MonthYear]
+    )
+)"
+"Sales Trend by Region"
+"CALCULATE(
+    [Total Sales(Net)],
+    SAMEPERIODLASTYEAR('Date Table'[Date])
+)"
+TOTALYTD([Total Sales], 'Date Table'[Date])
+DIVIDE([Total Sales] - [Sales Last Year], [Sales Last Year]) * 100
+DIVIDE([Total Sales] - [Net Sales Last Year], [Net Sales Last Year]) * 100
+"CALCULATE(
+    [Total Sales],
+    SAMEPERIODLASTYEAR('Date Table'[Date])
+)"
+"CALCULATE(
+    SUM('Sales Target'[Target]),
+    SAMEPERIODLASTYEAR('Date Table'[Date])
+)"
+"VAR _currentPct = [Pct Target Achieved]
+
+VAR _previousPct = 
+    CALCULATE(
+        [Pct Target Achieved],
+        DATEADD('Date Table'[Date], -1, YEAR)
+    )
+
+VAR _pctChange = 
+    DIVIDE(_currentPct - _previousPct, _previousPct)
+
+VAR _arrow = IF(_pctChange > 0, ""â–²+"", ""â–¼"")
+
+RETURN
+IF(
+    ISBLANK(_previousPct),
+    BLANK(),
+    ""Variance: "" & _arrow & FORMAT(_pctChange, ""0.0%"")
+)"
+"CALCULATE(
+    [Total Sales],
+    SAMEPERIODLASTYEAR('Date Table'[Date])
+)"
+"CALCULATE(
+                [Total Sales],
+                FILTER(Orders, Orders[Order ID] IN VALUES(Returns[Order ID]))
+            )"
+DIVIDE([Total Returns], [Total Sales]) * 100
+"VAR ReturnsPM = CALCULATE([Total Returns], DATEADD('Date Table'[Date], -1, MONTH))
+RETURN DIVIDE([Total Returns] - ReturnsPM, ReturnsPM) * 100"
+"CALCULATE(
+    COUNTROWS(Orders),
+    FILTER(
+        Orders,
+        Orders[Order ID] IN VALUES(Returns[Order ID])
+    )
+)"
+"DISTINCTCOUNT(
+            Customer[Customer ID])"
+"VAR _CurrentYear = SELECTEDVALUE('Date Table'[Year])
+VAR NewCustomers = 
+    CALCULATE(
+        DISTINCTCOUNT(Orders[Customer ID]),
+        FILTER(
+            ALL(Orders),
+            YEAR(Orders[Order Date]) = _CurrentYear &&
+            COUNTROWS(
+                FILTER(
+                    ALL(Orders),
+                    Orders[Customer ID] = EARLIER(Orders[Customer ID]) &&
+                    YEAR(Orders[Order Date]) < _CurrentYear
+                )
+            ) = 0
+        )
+    )
+RETURN NewCustomers"
+"VAR _CurrentYear = SELECTEDVALUE('Date Table'[Year])
+VAR _PreviousYear = _CurrentYear - 1
+
+-- Customers in Previous Year
+VAR CustomersPrev = 
+CALCULATETABLE(
+    VALUES(Orders[Customer ID]),
+    FILTER(
+        ALL('Date Table'),
+        'Date Table'[Year] = _PreviousYear
+    )
+)
+
+-- Customers in Current Year
+VAR CustomersCurr = 
+CALCULATETABLE(
+    VALUES(Orders[Customer ID]),
+    FILTER(
+        ALL('Date Table'),
+        'Date Table'[Year] = _CurrentYear
+    )
+)
+
+-- Retained Customers: Present in both years
+VAR Retained = 
+COUNTROWS(
+    INTERSECT(CustomersPrev, CustomersCurr)
+)
+
+-- Total Customers in Previous Year
+VAR TotalPrev = 
+COUNTROWS(CustomersPrev)
+
+RETURN
+DIVIDE(Retained, TotalPrev)"
+"VAR LastPurchaseDate = 
+    CALCULATE(
+        MAX(Orders[Order Date]),
+        ALLEXCEPT(Orders, Orders[Customer ID])
+    )
+
+VAR LatestOrderDateInModel = 
+    CALCULATE(MAX(Orders[Order Date]), ALL(Orders))
+
+RETURN
+DATEDIFF(LastPurchaseDate, LatestOrderDateInModel, DAY)"
+"CALCULATE(
+    DISTINCTCOUNT(Orders[Order ID]),
+    ALLEXCEPT(Orders, Orders[Customer ID]))"
+"CALCULATE(
+    [Total Sales],
+    ALLEXCEPT(Orders, Orders[Customer ID])
+)"
+"SWITCH(
+    TRUE(),
+    [Customer Recency] <= 30, 5,
+    [Customer Recency] <= 60, 4,
+    [Customer Recency] <= 90, 3,
+    [Customer Recency] <= 180, 2,
+    1
+)"
+"SWITCH(
+    TRUE(),
+    [Customer Frequency] >= 10, 5,
+    [Customer Frequency] >= 5, 4,
+    [Customer Frequency] >= 3, 3,
+    [Customer Frequency] >= 2, 2,
+    1
+)"
+"VAR CustomerMonetary = [Customer Monetary]
+VAR Rank_Monetary =
+    RANKX(
+        ALL(Orders[Customer ID]),
+        [Customer Monetary],
+        ,
+        DESC,
+        DENSE
+    )
+VAR TotalCustomers =
+    CALCULATE(
+        DISTINCTCOUNT(Orders[Customer ID]),
+        ALL(Orders)
+    )
+VAR Percentile = Rank_Monetary / TotalCustomers
+RETURN
+    SWITCH(
+        TRUE(),
+        Percentile <= 0.2, 5,
+        Percentile <= 0.4, 4,
+        Percentile <= 0.6, 3,
+        Percentile <= 0.8, 2,
+        1
+    )"
+"VAR R = [RFM Recency Score]
+VAR F = [RFM Frequency Score]
+VAR M = [RFM_Monetary_Score]
+RETURN
+SWITCH(
+    TRUE(),
+    R = 5 && F = 5, ""Champions"",
+    R >= 4 && F >= 4, ""Loyal Customers"",
+    R >= 4 && F <= 2, ""New Customers"",
+    R <= 2 && F >= 4, ""Can't Lose Them"",
+    R <= 2 && F = 3, ""At Risk"",
+    R = 3 && F = 3, ""Need Attention"",
+    R <= 2 && F <= 2, ""Hibernating"",
+    R = 3 && F <= 2, ""About to Sleep"",
+    R >= 4 && F = 3, ""Potential Loyalists"",
+    M >= 4 && R <= 2 && F <= 2, ""Big Spenders"",
+    F = 0, ""Inactive"",
+    ""Exploring""
+)"
+"VAR SelectedYear = SELECTEDVALUE('Date Table'[Year])
+VAR _EndOfYear = DATE(SelectedYear, 12, 31)
+
+-- Get customers who transacted before or on EOY
+VAR CustomersBeforeEOY =
+    CALCULATETABLE(
+        VALUES(Orders[Customer ID]),
+        FILTER(
+            ALL(Orders),
+            Orders[Order Date] <= _EndOfYear
+        )
+    )
+
+-- Filter to those customers who are Champions (based on lifetime RFM scores)
+VAR ChampionsOnly =
+    FILTER(
+        CustomersBeforeEOY,
+        [RFM Recency Score] >= 4 &&
+        [RFM Frequency Score] >= 4 &&
+        [RFM_Monetary_Score] >= 4
+    )
+
+RETURN
+    COUNTROWS(ChampionsOnly)"
+"CALCULATE(
+    DISTINCTCOUNT(Orders[Customer ID]),
+    ALLEXCEPT(Orders, Orders[Customer ID])
+)"
+"DIVIDE(
+    [Customer Count in Segment],
+    [Total Customers],
+    0
+) * 100"
+"MAX('Customer_RFM_Scores'[RFM Segment]) & UNICHAR(10) &
+FORMAT(COUNTROWS('Customer_RFM_Scores'), ""#,##0"") & "" ("" &
+FORMAT(DIVIDE(COUNTROWS('Customer_RFM_Scores'), CALCULATE(COUNTROWS('Customer_RFM_Scores'), ALL('Customer_RFM_Scores'))), ""0.00%"") & "")"""
+"SWITCH(
+    SELECTEDVALUE('Customer_RFM_Scores'[RFM Segment]),
+    ""Champions"", ""#2b8cbe"",
+    ""Loyal Customers"", ""#a6bddb"",
+    ""New Customers"", ""#ccebc5"",
+    ""Can't Lose Them"", ""#fdd49e"",
+    ""At Risk"", ""#fdbb84"",
+    ""Need Attention"", ""#fc9272"",
+    ""Hibernating"", ""#fdd0a2"",
+    ""About To Sleep"", ""#fdae6b"",
+    ""Potential Loyalists"", ""#d0d1e6"",
+    ""Promising"", ""#e7e1ef"",
+    ""Inactive"", ""#d9d9d9"",
+    ""Others"", ""#f0f0f0"",
+    ""Exploring"", ""#D5DBDB""
+)"
+"VAR _CurrentYear = SELECTEDVALUE('Date Table'[Year])
+RETURN
+CALCULATE(
+    [Total Sales],
+    FILTER(
+        ALL(Orders),
+        YEAR(Orders[Order Date]) = _CurrentYear &&
+        CALCULATE(
+            MIN(Orders[Order Date]),
+            ALLEXCEPT(Orders, Orders[Customer ID])
+        ) >= DATE(_CurrentYear,1,1) &&
+        CALCULATE(
+            MIN(Orders[Order Date]),
+            ALLEXCEPT(Orders, Orders[Customer ID])
+        ) <= DATE(_CurrentYear,12,31)
+    )
+)"
+"VAR _CurrentYear = SELECTEDVALUE('Date Table'[Year])
+RETURN
+CALCULATE(
+    AVERAGE(Orders[Quantity]),
+    FILTER(
+        ALL(Orders),
+        YEAR(Orders[Order Date]) = _CurrentYear &&
+        CALCULATE(
+            MIN(Orders[Order Date]),
+            ALLEXCEPT(Orders, Orders[Customer ID])
+        ) >= DATE(_CurrentYear,1,1) &&
+        CALCULATE(
+            MIN(Orders[Order Date]),
+            ALLEXCEPT(Orders, Orders[Customer ID])
+        ) <= DATE(_CurrentYear,12,31)
+    )
+)"
+"VAR _CurrentYear = SELECTEDVALUE('Date Table'[Year])
+RETURN
+CALCULATE(
+    AVERAGE(Orders[Discount]) * 100,
+    FILTER(
+        ALL(Orders),
+        YEAR(Orders[Order Date]) = _CurrentYear &&
+        CALCULATE(
+            MIN(Orders[Order Date]),
+            ALLEXCEPT(Orders, Orders[Customer ID])
+        ) >= DATE(_CurrentYear,1,1) &&
+        CALCULATE(
+            MIN(Orders[Order Date]),
+            ALLEXCEPT(Orders, Orders[Customer ID])
+        ) <= DATE(_CurrentYear,12,31)
+    )
+)"
+"VAR _CurrentYear = SELECTEDVALUE('Date Table'[Year])
+RETURN
+CALCULATE(
+    DISTINCTCOUNT(Orders[Customer ID]),
+    FILTER(
+        ALL(Orders),
+        YEAR(Orders[Order Date]) = _CurrentYear &&
+        CALCULATE(
+            MIN(Orders[Order Date]),
+            ALLEXCEPT(Orders, Orders[Customer ID])
+        ) >= DATE(_CurrentYear,1,1) &&
+        CALCULATE(
+            MIN(Orders[Order Date]),
+            ALLEXCEPT(Orders, Orders[Customer ID])
+        ) <= DATE(_CurrentYear,12,31)
+    )
+)"
+"SUMX(
+    VALUES(Orders[SalesPerson ID]),
+    CALCULATE(
+        [Total Sales]
+    )
+)"
+"CALCULATE(
+    AVERAGE(Orders[Discount]) * 100
+)"
+"VAR _Sales = [Salesperson Segment Sales]
+RETURN
+IF(
+    NOT ISBLANK(_Sales),
+    RANKX(
+        ALL(SalesPerson[Sales_person]),
+        CALCULATE([Salesperson Segment Sales]),
+        ,
+        DESC,
+        Dense
+    )
+)"
+IF([Salesperson Rank in Segment] <= 5, "Yes", "No")
+"""Top 5 Salespeople in | "" & 
+""State: "" & SELECTEDVALUE(Orders[State], ""All States"") & 
+"" | Region: "" & SELECTEDVALUE(Orders[Region], ""All Regions"") & 
+"" | Segment: "" & SELECTEDVALUE(Orders[Segment], ""All Segments"") & 
+"" | Category: "" & SELECTEDVALUE('Product'[Category], ""All Categories"") & 
+"" | Year: "" & SELECTEDVALUE('Date Table'[Year], ""All Years"")"
+"VAR CustomerSales = [Customer Monetary]
+VAR MaxSales = MAXX(ALL(Orders), [Customer Monetary])
+VAR MinSales = MINX(ALL(Orders), [Customer Monetary])
+RETURN 
+ROUND(
+    ((CustomerSales - MinSales) / (MaxSales - MinSales)) * 100,
+    0
+)"
+"VAR DaysSinceLastOrder = [Customer Recency]
+VAR PropensityBase = 
+    SWITCH(
+        TRUE(),
+        DaysSinceLastOrder <= 30, 90,
+        DaysSinceLastOrder <= 60, 75,
+        DaysSinceLastOrder <= 90, 60,
+        DaysSinceLastOrder <= 180, 40,
+        DaysSinceLastOrder <= 365, 25,
+        10
+    )
+VAR FrequencyBonus = MIN([Customer Frequency] * 2, 10)
+RETURN MIN(PropensityBase + FrequencyBonus, 100)/100"
+"VAR RecencyRisk = 
+    SWITCH(
+        TRUE(),
+        [Customer Recency] <= 30, 10,
+        [Customer Recency] <= 60, 25,
+        [Customer Recency] <= 90, 40,
+        [Customer Recency] <= 180, 60,
+        [Customer Recency] <= 365, 80,
+        95
+    )
+VAR FrequencyRisk = 
+    SWITCH(
+        TRUE(),
+        [Customer Frequency] >= 10, 5,
+        [Customer Frequency] >= 5, 15,
+        [Customer Frequency] >= 3, 30,
+        [Customer Frequency] >= 2, 50,
+        70
+    )
+RETURN MIN((RecencyRisk + FrequencyRisk) / 2, 100)"
+"VAR ValueScore = [Customer Value Score]
+VAR ChurnRisk = [Churn Risk Score]
+RETURN
+SWITCH(
+    TRUE(),
+    ValueScore >= 70 && ChurnRisk <= 30, ""RETAIN - VIP Treatment"",
+    ValueScore >= 70 && ChurnRisk > 30, ""WIN-BACK - Urgent Action"",
+    ValueScore >= 40 && ChurnRisk <= 50, ""TARGET - Cross-sell/Upsell"",
+    ValueScore < 40 && ChurnRisk > 60, ""MONITOR - Low Priority"",
+    ""NURTURE - General Campaign""
+)"
+"""ðŸŽ¯ Bonus Customer Scoring System | Action: "" & 
+SELECTEDVALUE('Customer_Scoring_Matrix'[Marketing Action], ""All Actions"") & 
+"" | Segment: "" & SELECTEDVALUE(Orders[Segment], ""All Segments"") & 
+"" | Region: "" & SELECTEDVALUE(Orders[Region], ""All Regions"") & 
+"" | Year: "" & SELECTEDVALUE('Date Table'[Year], ""All Years"")"
+"VAR _currentCustomers = [Total Customers]
+VAR _lastYearCustomers = 
+    CALCULATE(
+        [Total Customers],
+        SAMEPERIODLASTYEAR('Date Table'[Date])
+    )
+
+VAR _pctChange = DIVIDE(_currentCustomers - _lastYearCustomers, _lastYearCustomers)
+VAR _arrow = IF(_pctChange > 0, ""â–²+"", ""â–¼"")
+
+RETURN
+IF(
+    ISBLANK(_lastYearCustomers),
+    BLANK(),
+    ""Variance: "" & _arrow & FORMAT(_pctChange, ""0.0%"")
+)"
+"VAR _PreviousYear = 
+    CALCULATE(
+        MAX('Date Table'[Year]),
+        SAMEPERIODLASTYEAR('Date Table'[Date])
+    )
+
+VAR _PreviousCust = 
+    CALCULATE(
+        DISTINCTCOUNT(Orders[Customer ID]),
+        SAMEPERIODLASTYEAR('Date Table'[Date])
+    )
+
+RETURN
+IF(
+    NOT ISBLANK(_PreviousYear),
+    _PreviousYear & "" : "" & FORMAT(_PreviousCust, ""#,##0"") & "" Customers"",
+    BLANK()
+)"
+"VAR _Change = 
+    DIVIDE(
+        [Total Customers] - 
+        CALCULATE([Total Customers], SAMEPERIODLASTYEAR('Date Table'[Date])),
+        CALCULATE([Total Customers], SAMEPERIODLASTYEAR('Date Table'[Date]))
+    )
+
+RETURN
+IF(
+    ISBLANK(_Change),
+    BLANK(),
+    IF(
+        _Change > 0,
+        ""#03A64A"",   // âœ… Green
+        ""#BF0426""    // âŒ Red
+    )
+)"
+"VAR _CurrentYear = SELECTEDVALUE('Date Table'[Year])
+VAR _PY_Year = _CurrentYear - 1
+VAR _PPY_Year = _CurrentYear - 2
+
+VAR CustomersPrev = 
+    CALCULATETABLE(
+        VALUES(Orders[Customer ID]),
+        FILTER(ALL('Date Table'), 'Date Table'[Year] = _PPY_Year)
+    )
+
+VAR CustomersCurr = 
+    CALCULATETABLE(
+        VALUES(Orders[Customer ID]),
+        FILTER(ALL('Date Table'), 'Date Table'[Year] = _PY_Year)
+    )
+
+VAR Retained = COUNTROWS(INTERSECT(CustomersPrev, CustomersCurr))
+VAR TotalPrev = COUNTROWS(CustomersPrev)
+VAR RetentionRate = DIVIDE(Retained, TotalPrev)
+
+RETURN
+IF(
+    NOT ISBLANK(RetentionRate),
+    _PY_Year & "" Retention: "" & FORMAT(RetentionRate, ""0.00%""),
+    BLANK()
+)"
+"VAR _CurrentYear = SELECTEDVALUE('Date Table'[Year])
+VAR _PreviousYear = _CurrentYear - 1
+VAR _YearBeforePrevious = _CurrentYear - 2
+
+-- Retention Rate for Current Year
+VAR _CustomersPY = 
+    CALCULATETABLE(
+        VALUES(Orders[Customer ID]),
+        FILTER(ALL('Date Table'), 'Date Table'[Year] = _PreviousYear)
+    )
+
+VAR _CustomersCY = 
+    CALCULATETABLE(
+        VALUES(Orders[Customer ID]),
+        FILTER(ALL('Date Table'), 'Date Table'[Year] = _CurrentYear)
+    )
+
+VAR _RetainedCY = COUNTROWS(INTERSECT(_CustomersPY, _CustomersCY))
+VAR _RetentionCY = DIVIDE(_RetainedCY, COUNTROWS(_CustomersPY))
+
+-- Retention Rate for Previous Year (PY vs PPY)
+VAR _CustomersPPY = 
+    CALCULATETABLE(
+        VALUES(Orders[Customer ID]),
+        FILTER(ALL('Date Table'), 'Date Table'[Year] = _YearBeforePrevious)
+    )
+
+VAR _RetainedPY = COUNTROWS(INTERSECT(_CustomersPPY, _CustomersPY))
+VAR _RetentionPY = DIVIDE(_RetainedPY, COUNTROWS(_CustomersPPY))
+
+-- Calculate YoY Change
+VAR _pctChange = DIVIDE(_RetentionCY - _RetentionPY, _RetentionPY)
+VAR _arrow = IF(_pctChange > 0, ""â–²+"", ""â–¼"")
+
+RETURN
+IF(
+    ISBLANK(_RetentionPY),
+    BLANK(),
+    ""Variance: "" & _arrow & FORMAT(_pctChange, ""0.0%"")
+)"
+"VAR _CurrentYear = SELECTEDVALUE('Date Table'[Year])
+VAR _PreviousYear = _CurrentYear - 1
+VAR _YearBeforePrevious = _CurrentYear - 2
+
+-- Retention for Current Year (CY vs PY)
+VAR _CustomersPY = 
+    CALCULATETABLE(
+        VALUES(Orders[Customer ID]),
+        FILTER(ALL('Date Table'), 'Date Table'[Year] = _PreviousYear)
+    )
+
+VAR _CustomersCY = 
+    CALCULATETABLE(
+        VALUES(Orders[Customer ID]),
+        FILTER(ALL('Date Table'), 'Date Table'[Year] = _CurrentYear)
+    )
+
+VAR _RetainedCY = COUNTROWS(INTERSECT(_CustomersPY, _CustomersCY))
+VAR _RetentionCY = DIVIDE(_RetainedCY, COUNTROWS(_CustomersPY))
+
+-- Retention for Previous Year (PY vs PPY)
+VAR _CustomersPPY = 
+    CALCULATETABLE(
+        VALUES(Orders[Customer ID]),
+        FILTER(ALL('Date Table'), 'Date Table'[Year] = _YearBeforePrevious)
+    )
+
+VAR _RetainedPY = COUNTROWS(INTERSECT(_CustomersPPY, _CustomersPY))
+VAR _RetentionPY = DIVIDE(_RetainedPY, COUNTROWS(_CustomersPPY))
+
+-- Calculate % Change
+VAR _pctChange = DIVIDE(_RetentionCY - _RetentionPY, _RetentionPY)
+
+RETURN
+IF(
+    ISBLANK(_pctChange),
+    BLANK(),
+    IF(_pctChange > 0, ""#03A64A"", ""#BF0426"")
+)"
+"VAR _selectedYear = SELECTEDVALUE('Date Table'[Year])
+VAR _endOfYear = DATE(_selectedYear, 12, 31)
+
+VAR _highValue = [High Value Segment EOY]  -- Champions count
+
+-- Total customers up to EOY
+VAR _totalCust = 
+    CALCULATE(
+        DISTINCTCOUNT(Orders[Customer ID]),
+        FILTER(ALL(Orders), Orders[Order Date] <= _endOfYear)
+    )
+
+VAR _pct = DIVIDE(_highValue, _totalCust)
+VAR _arrow = IF(_pct > 0, ""â†—"", ""â†˜"")
+
+RETURN
+IF(
+    ISBLANK(_pct),
+    BLANK(),
+    _arrow & "" "" & FORMAT(_pct, ""0.0%"") & "" of total customers Till EOY""
+)"
+"VAR _highValue = [High Value Segment EOY]
+VAR _totalCust = [Total Customers]
+VAR _pct = DIVIDE(_highValue, _totalCust)
+
+RETURN
+IF(
+    ISBLANK(_pct),
+    BLANK(),
+    IF(_pct > 0, ""#03A64A"", ""#BF0426"")  // Green if positive %, Red otherwise
+)"
+"VAR _CurrentYear = SELECTEDVALUE('Date Table'[Year])
+VAR _PreviousYear = _CurrentYear - 1
+
+-- New customers in previous year = those who purchased in that year for the first time
+VAR _NewCustomersPY = 
+    CALCULATETABLE(
+        VALUES(Orders[Customer ID]),
+        FILTER(
+            ALL(Orders),
+            YEAR(Orders[Order Date]) = _PreviousYear &&
+            CALCULATE(
+                MIN(Orders[Order Date]),
+                ALLEXCEPT(Orders, Orders[Customer ID])
+            ) >= DATE(_PreviousYear, 1, 1) &&
+            CALCULATE(
+                MIN(Orders[Order Date]),
+                ALLEXCEPT(Orders, Orders[Customer ID])
+            ) <= DATE(_PreviousYear, 12, 31)
+        )
+    )
+
+RETURN
+IF(
+    NOT ISBLANK(_PreviousYear),
+    _PreviousYear & "" : "" & FORMAT(COUNTROWS(_NewCustomersPY), ""#,##0"") & "" New Customers"",
+    BLANK()
+)"
+"VAR _CurrentYear = SELECTEDVALUE('Date Table'[Year])
+
+-- New customers in current year
+VAR _NewCustomersCY = 
+    CALCULATETABLE(
+        VALUES(Orders[Customer ID]),
+        FILTER(
+            ALL(Orders),
+            YEAR(Orders[Order Date]) = _CurrentYear &&
+            CALCULATE(
+                MIN(Orders[Order Date]),
+                ALLEXCEPT(Orders, Orders[Customer ID])
+            ) >= DATE(_CurrentYear, 1, 1) &&
+            CALCULATE(
+                MIN(Orders[Order Date]),
+                ALLEXCEPT(Orders, Orders[Customer ID])
+            ) <= DATE(_CurrentYear, 12, 31)
+        )
+    )
+
+-- Previous year
+VAR _PY = _CurrentYear - 1
+VAR _NewCustomersPY = 
+    CALCULATETABLE(
+        VALUES(Orders[Customer ID]),
+        FILTER(
+            ALL(Orders),
+            YEAR(Orders[Order Date]) = _PY &&
+            CALCULATE(
+                MIN(Orders[Order Date]),
+                ALLEXCEPT(Orders, Orders[Customer ID])
+            ) >= DATE(_PY, 1, 1) &&
+            CALCULATE(
+                MIN(Orders[Order Date]),
+                ALLEXCEPT(Orders, Orders[Customer ID])
+            ) <= DATE(_PY, 12, 31)
+        )
+    )
+
+VAR _cyCount = COUNTROWS(_NewCustomersCY)
+VAR _pyCount = COUNTROWS(_NewCustomersPY)
+VAR _pctChange = DIVIDE(_cyCount - _pyCount, _pyCount)
+VAR _arrow = IF(_pctChange > 0, ""â–²+"", ""â–¼"")
+
+RETURN
+IF(
+    ISBLANK(_pyCount),
+    BLANK(),
+    ""Variance: "" & _arrow & FORMAT(_pctChange, ""0.0%"")
+)"
+"VAR _CurrentYear = SELECTEDVALUE('Date Table'[Year])
+
+-- New customers in current year
+VAR _NewCustomersCY = 
+    CALCULATETABLE(
+        VALUES(Orders[Customer ID]),
+        FILTER(
+            ALL(Orders),
+            YEAR(Orders[Order Date]) = _CurrentYear &&
+            CALCULATE(
+                MIN(Orders[Order Date]),
+                ALLEXCEPT(Orders, Orders[Customer ID])
+            ) >= DATE(_CurrentYear, 1, 1) &&
+            CALCULATE(
+                MIN(Orders[Order Date]),
+                ALLEXCEPT(Orders, Orders[Customer ID])
+            ) <= DATE(_CurrentYear, 12, 31)
+        )
+    )
+
+-- Previous year
+VAR _PY = _CurrentYear - 1
+VAR _NewCustomersPY = 
+    CALCULATETABLE(
+        VALUES(Orders[Customer ID]),
+        FILTER(
+            ALL(Orders),
+            YEAR(Orders[Order Date]) = _PY &&
+            CALCULATE(
+                MIN(Orders[Order Date]),
+                ALLEXCEPT(Orders, Orders[Customer ID])
+            ) >= DATE(_PY, 1, 1) &&
+            CALCULATE(
+                MIN(Orders[Order Date]),
+                ALLEXCEPT(Orders, Orders[Customer ID])
+            ) <= DATE(_PY, 12, 31)
+        )
+    )
+
+VAR _cyCount = COUNTROWS(_NewCustomersCY)
+VAR _pyCount = COUNTROWS(_NewCustomersPY)
+VAR _pctChange = DIVIDE(_cyCount - _pyCount, _pyCount)
+
+RETURN
+IF(
+    ISBLANK(_pctChange),
+    BLANK(),
+    IF(_pctChange > 0, ""#03A64A"", ""#BF0426"")
+)"
+"VAR _selectedYear = SELECTEDVALUE('Date Table'[Year])
+RETURN
+CALCULATE(
+    SUM('Sales Target'[Target]),
+    FILTER(
+        'Sales Target',
+        YEAR('Sales Target'[MonthYear]) = _selectedYear
+    )
+)"
+[Total Sales] - [Yearly Target]
+"COUNTROWS(
+    FILTER(
+        VALUES(Orders[State]),
+        [Target Achievement %] < 100
+    )
+)"
+"RANKX(
+    ALL(Orders[State]),
+    [Selected State Metric],
+    ,
+    ASC,
+    DENSE
+)"
+"VAR _actual = [Total Sales]
+VAR _target = [Yearly Target]
+VAR _change = DIVIDE(_actual - _target, _target)
+VAR _arrow = IF(_change >= 0, ""â†— +"", ""â†˜ -"")
+
+RETURN
+IF(
+    ISBLANK(_target),
+    BLANK(),
+    _arrow & FORMAT(ABS(_change), ""0.0%"")
+)"
+"VAR _selectedYear = SELECTEDVALUE('Date Table'[Year])
+VAR _target = 
+    CALCULATE(
+        SUM('Sales Target'[Target]),
+        FILTER(
+            'Sales Target',
+            YEAR('Sales Target'[MonthYear]) = _selectedYear
+        )
+    )
+RETURN
+IF(
+    NOT ISBLANK(_target),
+    _selectedYear & "" Target : $"" & FORMAT(_target / 1000, ""0.0"") & ""K"",
+    BLANK()
+)"
+"VAR _actual = [Total Sales]
+VAR _target = [Yearly Target]
+VAR _change = DIVIDE(_actual - _target, _target)
+
+RETURN
+IF(
+    ISBLANK(_change),
+    BLANK(),
+    IF(_change >= 0, ""#03A64A"", ""#BF0426"")  // âœ… Green or âŒ Red
+)"
+"VAR _totalStates = COUNTROWS(VALUES(Orders[State]))
+RETURN
+""â†˜ out of "" & _totalStates & "" total"""
+"SWITCH(
+    TRUE(),
+    [Target Achievement %] < 50, ""#F8D7DA"",          // Light Red
+    [Target Achievement %] < 100, ""#FFE5B4"",         // Soft Orange
+    [Target Achievement %] < 200, ""#D4EDDA"",         // Light Yellow-Green
+    [Target Achievement %] < 500, ""#C3E6CB"",         // Pastel Green
+    [Target Achievement %] >= 500, ""#A9DFBF"",        // Light Aqua-Green
+    BLANK()
+)"
+"SWITCH(
+    SELECTEDVALUE('Target Achievement states'[Target Achievement states Fields]),
+    NAMEOF('1.Sales Measures'[Total Sales]), [Total Sales],
+    NAMEOF('1.Sales Measures'[Total Target]), [Total Target],
+    NAMEOF('1.Sales Measures'[Target Achievement %]), [Target Achievement %],
+    NAMEOF('1.Sales Measures'[Profit Margin %]), [Profit Margin %],
+    BLANK()
+)"
+"RANKX(
+    ALLSELECTED(Orders[State]),
+    [Selected State Metric],
+    ,
+    DESC
+)"
+"VAR _SelectedN = SELECTEDVALUE('Top Bottom SLide'[Top Bottom SLide])
+RETURN IF([State Rank by Selected Measure] <= _SelectedN, 1, 0)"
+"VAR _TopStates = 
+    TOPN(
+        SELECTEDVALUE('Top Bottom SLide'[Top Bottom SLide]),
+        ALL(Orders[State]),
+        [Selected State Metric],
+        DESC
+    )
+VAR _CurrentState = SELECTEDVALUE(Orders[State])
+
+RETURN
+    IF(_CurrentState IN _TopStates, [Selected State Metric])"
+"VAR _Rank = [State Rank (BottomN)]
+VAR _Limit = SELECTEDVALUE('Top Bottom SLide'[Top Bottom SLide])
+
+RETURN
+IF(_Rank <= _Limit, [Selected State Metric])"
+"VAR _SelectedN = SELECTEDVALUE('Top Bottom SLide'[Top Bottom SLide])
+
+VAR _Rank = 
+    RANKX(
+        ALL(Orders[State]),
+        [Selected State Metric],
+        ,
+        ASC,
+        DENSE
+    )
+
+-- Only show values for states ranked within top N
+RETURN
+    IF(_Rank <= _SelectedN, [Selected State Metric])"
+"VAR _actual = [Total Sales]
+VAR _target = [Yearly Target]
+VAR _gap = _actual - _target
+VAR _arrow = IF(_gap >= 0, ""+"", ""-"")
+
+RETURN
+IF(
+    ISBLANK(_target),
+    BLANK(),
+    _arrow & ""$"" & FORMAT(ABS(_gap)/1000, ""#,##0.00"") & ""K""
+)"
+SELECTEDVALUE('Top Bottom SLide'[Top Bottom SLide], 5)
+"VAR ConsumerSales = CALCULATE([Total Sales], Orders[Segment] = ""Consumer"")
+VAR CorporateSales = CALCULATE([Total Sales], Orders[Segment] = ""Corporate"")
+VAR HomeOfficeSales = CALCULATE([Total Sales], Orders[Segment] = ""Home Office"")
+
+VAR ConsumerImpact = ConsumerSales * ('Consumer Discount'[Consumer Discount (0-30%) Value] / 100)
+VAR CorporateImpact = CorporateSales * ('Corporate Discount'[Corporate Discount (0-30%) Value] / 100)
+VAR HomeOfficeImpact = HomeOfficeSales * ('Home Office Discount'[Home Office Discount (0-30%) Value] / 100)
+
+RETURN ConsumerImpact + CorporateImpact + HomeOfficeImpact"
+"VAR AvgDiscount = 
+    (
+        'Consumer Discount'[Consumer Discount (0-30%) Value] + 
+        'Corporate Discount'[Corporate Discount (0-30%) Value] + 
+        'Home Office Discount'[Home Office Discount (0-30%) Value]
+    ) / 3
+
+RETURN
+AvgDiscount * 1.2 / 100"
+"VAR MarginLoss = [Discount Impact]
+VAR VolumeGain = [Total Sales] * ([Volume Increase %] / 100) * 0.3
+RETURN [Total Profit] - MarginLoss + VolumeGain"
+"Base Scenario"
+"VAR _baseline = [Total Profit]
+VAR _predicted = [Predicted Profit]
+VAR _change = DIVIDE(_predicted - _baseline, _baseline)
+VAR _arrow = IF(_change >= 0, ""â†— +"", ""â†˜ -"")
+
+RETURN
+IF(
+    ISBLANK(_baseline),
+    BLANK(),
+    _arrow & FORMAT(ABS(_change), ""0.0%"") & "" vs baseline""
+)"
+"â†— Expected increase"
+"â†˜ Negative impact"
+CALCULATE([Predicted Profit] - [Total Profit])
+"SWITCH(
+    SELECTEDVALUE('Profit Impact Steps'[Step]),
+    
+    ""Current Profit"", [Total Profit],
+    
+    ""Consumer Discount Loss"", 
+        -1 * CALCULATE(
+                [Total Sales],
+                Orders[Segment] = ""Consumer""
+            ) * ('Consumer Discount'[Consumer Discount (0-30%) Value] / 100),
+    
+    ""Corporate Discount Loss"", 
+        -1 * CALCULATE(
+                [Total Sales],
+                Orders[Segment] = ""Corporate""
+            ) * ('Corporate Discount'[Corporate Discount (0-30%) Value] / 100),
+    
+    ""Home Office Discount Loss"", 
+        -1 * CALCULATE(
+                [Total Sales],
+                Orders[Segment] = ""Home Office""
+            ) * ('Home Office Discount'[Home Office Discount (0-30%) Value] / 100),
+    
+    ""Volume Gain"", 
+        [Total Sales] * ([Volume Increase %] / 100) * 0.3,
+    
+    ""Predicted Profit"", 
+        [Predicted Profit]
+)"
+"SWITCH(
+    SELECTEDVALUE('Scenario Comparison'[Metric]),
+    ""Profit"", [Total Profit],
+    ""Volume"", [Total Quantity],
+    ""Revenue"", [Total Sales]
+)"
+"SWITCH(
+    SELECTEDVALUE('Scenario Comparison'[Metric]),
+    ""Profit"", [Predicted Profit],
+    ""Volume"", [Total Quantity] * (1 + ([Volume Increase %] / 100)),
+    ""Revenue"", [Total Sales] * (1 + ([Volume Increase %] / 100))
+)"
+SELECTEDVALUE('Consumer Discount'[Consumer Discount (0-30%)], 0)
+SELECTEDVALUE('Corporate Discount'[Corporate Discount (0-30%)], 0)
+SELECTEDVALUE('Home Office Discount'[Home Office Discount (0-30%)])
+SELECTEDVALUE('Revenue Percentage'[Customer Percentage], 20)
+sum(Customer[Total Sales])
+DISTINCTCOUNT(Orders[Customer ID])
+"VAR _SelectedPct = SELECTEDVALUE('Revenue Percentage'[Customer Percentage])
+RETURN
+ROUND(
+    ([Total Customers Count] * (_SelectedPct)/100),
+    0
+)"
+"CALCULATE(
+    [Total Sales],
+    FILTER(
+        VALUES(Orders[Customer ID]),
+        [Customer Sales Rank] <= CALCULATE([Selected Customers Threshold], ALL(Orders))
+    )
+)"
+DIVIDE([Top Customers Sales], [Total Sales])
+"VAR Contribution = [Sales Contribution %]
+VAR CustomerPct = SELECTEDVALUE('Revenue Percentage'[Customer Percentage])
+RETURN
+SWITCH(
+    TRUE(),
+    CustomerPct <= .20 && Contribution >= .80, ""ACHIEVED"",
+    CustomerPct <= .25 && Contribution >= .75, ""NEAR"",
+    ""DISTANT""
+)"
+"VAR _Rank = [Revenue]
+VAR _Total = [Total Customers Count]
+VAR Percentile = _Rank / _Total
+RETURN
+SWITCH(
+    TRUE(),
+    Percentile <= 0.2, ""A-Tier (Top 20%)"",
+    Percentile <= 0.5, ""B-Tier (Next 30%)"",
+    ""C-Tier (Bottom 50%)""
+)"
+SELECTEDVALUE('Revenue Percentage'[Customer Percentage])/100
+"CALCULATE(
+    [Total Sales],
+    REMOVEFILTERS(Orders[Customer ID])
+)"
+"if  (
+        ISINSCOPE(Customer[Customer Name]),
+        RANKX(ALLSELECTED(Customer[Customer Name]),[Revenue]))"
+DIVIDE([Revenue] ,CALCULATE([Revenue], ALL(Customer[Customer Name])))
+"VAR CurrentRank = [Rank]
+RETURN
+CALCULATE(
+    [Revenue],
+    FILTER(
+        ALLSELECTED(Customer[Customer Name]),
+        [Rank] <= CurrentRank
+    )
+)"
+CALCULATE([Revenue] , ALL(Customer[Customer Name]))
+DIVIDE([Cumulative Revenue],[Total Revenue])
+"var _closestsustomer = [Cut-off Customer]
+    RETURN
+        IF(SELECTEDVALUE('Customer'[Customer Name])=_closestsustomer,[Cumulative Revenue],BLANK())"
+"VAr closestcustomer = [Cut-off Customer]
+    return  if( SELECTEDVALUE(Customer[Customer Name])=closestcustomer,[Rank],blank())"
+CALCULATE(MAXX(VALUES(Customer[Customer Name]),[Cutoff Rank]),ALLSELECTED(Customer),ALLSELECTED(Orders))
+if ([Rank] > [Pareto cutoff rank] , "#80D8C3" , "#4DA8DA")
+BLANK()
+"var closecustomer = [Cut-off Customer]
+    return if (
+            SELECTEDVALUE(Customer[Customer Name]) = closecustomer,
+            [Cumulative Revenue %],
+            Blank())"
+"RANKX(
+    ALL(Orders[Customer ID]),
+    [Customer Monetary],
+    ,
+    DESC
+)"
+"VAR ParoValue = 
+    CALCULATE(
+        [Sales Contribution %],
+        REMOVEFILTERS(Customer[Customer Name])
+    )
+VAR SummaryTable =
+    ADDCOLUMNS(
+        SUMMARIZE(
+            ALLSELECTED(Customer[Customer Name]), 
+            Customer[Customer Name]
+        ),
+        ""Sales"", CALCULATE(SUM(Customer[total sales])),
+        ""Rank"", [Rank],
+        ""CumulativeSalesPercentage"", [Cumulative Revenue %],
+        ""Difference"", ABS([Cumulative Revenue %] - ParoValue)
+    )
+RETURN
+    MAXX(
+        TOPN(
+            1,
+            SummaryTable,
+            [Difference],
+            ASC
+        ),
+        Customer[Customer Name]
+    )"
+SELECTEDVALUE( 'Revenue Percentage'[Customer Percentage])
+1
