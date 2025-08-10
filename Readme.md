@@ -216,7 +216,7 @@ RETURN
 
 ## 🧭 How to Use the Dashboard
 
-- **Open the .pbix file** using Power BI Desktop (requires Power BI Pro or Premium)
+- **Open the .pbix file** using Power BI Desktop.
 - **Use slicers** to filter by Region, Segment, Category, or Time Period across all pages
 - **Navigate through each page** using the bottom tabs for different analytical views
 - **On the What-If page**, adjust the discount sliders to simulate pricing strategies
